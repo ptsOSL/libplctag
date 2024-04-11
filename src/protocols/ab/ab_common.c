@@ -440,7 +440,6 @@ plc_tag_p ab_tag_create(attr attribs, void (*tag_callback_func)(int32_t tag_id, 
     tag->elem_count = attr_get_int(attribs,"elem_count", 1);
 
     switch(tag->plc_type) {
-        /* fall through */
     case AB_PLC_OMRON_NJNX:
         /* fall through */
     case AB_PLC_LGX:

@@ -80,6 +80,7 @@ struct tag_byte_order_s {
     unsigned int str_is_fixed_length:1;
     unsigned int str_is_zero_terminated:1;
     unsigned int str_is_byte_swapped:1;
+    unsigned int str_pad_to_16_bits:1;
 
     unsigned int str_count_word_bytes;
     unsigned int str_max_capacity;

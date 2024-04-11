@@ -3980,6 +3980,10 @@ int set_tag_byte_order(plc_tag_p tag, attr attribs)
         use_default = 0;
     }
 
+    if(attr_get_str(attribs, "str_pad_to_16_bits", NULL) != NULL) {
+        use_default = 0;
+    }
+
     /* if we need to override something, build a new byte order structure. */
     if(!use_default) {
         const char *byte_order_str = NULL;
@@ -4181,6 +4185,18 @@ int set_tag_byte_order(plc_tag_p tag, attr attribs)
                 tag->byte_order->str_pad_bytes = (unsigned int)str_param;
             } else {
                 pdebug(DEBUG_WARN, "Tag string attribute str_pad_bytes must be missing, 0, or positive!");
+                return PLCTAG_ERR_BAD_PARAM;
+            }
+        }
+
+        /* Should we pad the string to an even number of bytes. Doing this causes issues when writing OmronNJ strings, 
+            required for certain AB PLCs*/
+        if(attr_get_str(attribs, "str_pad_to_16_bits", NULL)) {
+            str_param = attr_get_int(attribs, "str_pad_to_16_bits", 0);
+            if(str_param == 0 || str_param == 1) {
+                tag->byte_order->str_pad_to_16_bits = (unsigned int)str_param;
+            } else {
+                pdebug(DEBUG_WARN, "Tag string attribute str_pad_to_16_bits must be missing, 0, or 1!");
                 return PLCTAG_ERR_BAD_PARAM;
             }
         }
