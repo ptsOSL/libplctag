@@ -1152,6 +1152,7 @@ int build_write_request_unconnected(ab_tag_p tag, int byte_offset)
     ab_request_p req = NULL;
     int multiple_requests = 0;
     int write_size = 0;
+    int pad_to_even_bytes = 1;
 
     pdebug(DEBUG_INFO, "Starting.");
 
