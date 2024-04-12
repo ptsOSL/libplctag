@@ -1245,9 +1245,14 @@ int build_write_request_unconnected(ab_tag_p tag, int byte_offset)
     tag->offset += write_size;
 
     /* need to pad data to multiple of 16-bits */
-    if (write_size & 0x01) {
-        *data = 0;
-        data++;
+    /* for some PLCs (OmronNJ), padding causes issues when writing counted strings as it creates a mismatch between
+        the length of the string and the count integer, therefor this padding can be disabled using the str_pad_16_bits attribute */
+    pad_to_even_bytes = tag->byte_order->str_pad_to_16_bits;
+    if (pad_to_even_bytes == 1){
+        if (write_size & 0x01) {
+            *data = 0;
+            data++;
+        }
     }
 
     /* now we go back and fill in the fields of the static part */
