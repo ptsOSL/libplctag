@@ -174,8 +174,8 @@ tag_byte_order_t logix_tag_byte_order = {
     .str_is_fixed_length = 1,
     .str_is_zero_terminated = 0,
     .str_is_byte_swapped = 0,
-    .str_pad_to_16_bits = 1,
 
+    .str_pad_to_multiple_bytes = 2,
     .str_count_word_bytes = 4,
     .str_max_capacity = 82,
     .str_total_length = 88,
@@ -198,8 +198,8 @@ tag_byte_order_t omron_njnx_tag_byte_order = {
     .str_is_fixed_length = 0,
     .str_is_zero_terminated = 1,
     .str_is_byte_swapped = 0,
-    .str_pad_to_16_bits = 0,
 
+    .str_pad_to_multiple_bytes = 1,
     .str_count_word_bytes = 2,
     .str_max_capacity = 0,
     .str_total_length = 0,
@@ -220,8 +220,8 @@ tag_byte_order_t logix_tag_listing_byte_order = {
     .str_is_fixed_length = 0,
     .str_is_zero_terminated = 0,
     .str_is_byte_swapped = 0,
-    .str_pad_to_16_bits = 1,
 
+    .str_pad_to_multiple_bytes = 2,
     .str_count_word_bytes = 2,
     .str_max_capacity = 0,
     .str_total_length = 0,
@@ -999,7 +999,7 @@ int build_write_request_connected(ab_tag_p tag, int byte_offset)
     ab_request_p req = NULL;
     int multiple_requests = 0;
     int write_size = 0;
-    int pad_to_even_bytes = 1;
+    int str_pad_to_multiple_bytes = 1;
 
     pdebug(DEBUG_INFO, "Starting.");
 
@@ -1090,14 +1090,17 @@ int build_write_request_connected(ab_tag_p tag, int byte_offset)
     data += write_size;
     tag->offset += write_size;
 
-    /* need to pad data to multiple of 16-bits */
+    /* need to pad data to multiple of either 1, 2 or 4 bytes */
     /* for some PLCs (OmronNJ), padding causes issues when writing counted strings as it creates a mismatch between
         the length of the string and the count integer, therefor this padding can be disabled using the str_pad_16_bits attribute */
-    pad_to_even_bytes = tag->byte_order->str_pad_to_16_bits;
-    if (pad_to_even_bytes == 1){
-        if (write_size & 0x01) {
-            *data = 0;
-            data++;
+    str_pad_to_multiple_bytes = (int)tag->byte_order->str_pad_to_multiple_bytes;
+    if ((str_pad_to_multiple_bytes == 2 || str_pad_to_multiple_bytes == 4) && write_size != 0){
+        if (write_size % str_pad_to_multiple_bytes !=0){
+            int pad_size = str_pad_to_multiple_bytes-(write_size % str_pad_to_multiple_bytes);
+            for (int i =0; i<pad_size; i++){
+                *data = 0;
+                data ++;
+            }
         }
     }
 
@@ -1152,7 +1155,7 @@ int build_write_request_unconnected(ab_tag_p tag, int byte_offset)
     ab_request_p req = NULL;
     int multiple_requests = 0;
     int write_size = 0;
-    int pad_to_even_bytes = 1;
+    int str_pad_to_multiple_bytes = 1;
 
     pdebug(DEBUG_INFO, "Starting.");
 
@@ -1245,16 +1248,20 @@ int build_write_request_unconnected(ab_tag_p tag, int byte_offset)
     data += write_size;
     tag->offset += write_size;
 
-    /* need to pad data to multiple of 16-bits */
+    /* need to pad data to multiple of either 1, 2 or 4 bytes */
     /* for some PLCs (OmronNJ), padding causes issues when writing counted strings as it creates a mismatch between
         the length of the string and the count integer, therefor this padding can be disabled using the str_pad_16_bits attribute */
-    pad_to_even_bytes = tag->byte_order->str_pad_to_16_bits;
-    if (pad_to_even_bytes == 1){
-        if (write_size & 0x01) {
-            *data = 0;
-            data++;
+    str_pad_to_multiple_bytes = (int)tag->byte_order->str_pad_to_multiple_bytes;
+    if ((str_pad_to_multiple_bytes == 2 || str_pad_to_multiple_bytes == 4) && write_size != 0){
+        if (write_size % str_pad_to_multiple_bytes !=0){
+            int pad_size = str_pad_to_multiple_bytes-(write_size % str_pad_to_multiple_bytes);
+            for (int i =0; i<pad_size; i++){
+                *data = 0;
+                data ++;
+            }
         }
     }
+
 
     /* now we go back and fill in the fields of the static part */
     /* mark the end of the embedded packet */
