@@ -218,27 +218,32 @@ plc_tag_p ab_tag_create(attr attribs, void (*tag_callback_func)(int32_t tag_id, 
     case AB_PLC_PLC5:
         tag->use_connected_msg = 0;
         tag->allow_packing = 0;
+        tag->supports_fragmented_read = 0;
         break;
 
     case AB_PLC_SLC:
         tag->use_connected_msg = 0;
         tag->allow_packing = 0;
+        tag->supports_fragmented_read = 0;
         break;
 
     case AB_PLC_MLGX:
         tag->use_connected_msg = 0;
         tag->allow_packing = 0;
+        tag->supports_fragmented_read = 0;
         break;
 
     case AB_PLC_LGX_PCCC:
         tag->use_connected_msg = 0;
         tag->allow_packing = 0;
+        tag->supports_fragmented_read = 0;
         break;
 
     case AB_PLC_LGX:
         /* default to requiring a connection and allowing packing. */
         tag->use_connected_msg = attr_get_int(attribs,"use_connected_msg", 1);
         tag->allow_packing = attr_get_int(attribs, "allow_packing", 1);
+        tag->supports_fragmented_read = 1;
         break;
 
     case AB_PLC_MICRO800:
@@ -248,6 +253,7 @@ plc_tag_p ab_tag_create(attr attribs, void (*tag_callback_func)(int32_t tag_id, 
 
         /* Micro800 cannot pack requests. */
         tag->allow_packing = 0;
+        tag->supports_fragmented_read = 1;
         break;
 
     case AB_PLC_OMRON_NJNX:
@@ -258,6 +264,7 @@ plc_tag_p ab_tag_create(attr attribs, void (*tag_callback_func)(int32_t tag_id, 
          * whether the results will fit or not.
          */
         tag->allow_packing = attr_get_int(attribs, "allow_packing", 0);
+        tag->supports_fragmented_read = 0;
         break;
 
     default:
@@ -1180,9 +1187,3 @@ int check_write_request_status(ab_tag_p tag, ab_request_p request)
 
     return rc;
 }
-
-
-
-
-
-

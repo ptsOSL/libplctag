@@ -113,6 +113,7 @@ struct ab_tag_t {
     int offset;
 
     int allow_packing;
+    int supports_fragmented_read;
 
     /* flags for operations */
     int read_in_progress;
