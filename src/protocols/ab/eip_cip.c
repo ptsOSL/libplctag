@@ -493,6 +493,13 @@ int build_read_request_connected(ab_tag_p tag, int byte_offset)
 
     req->allow_packing = tag->allow_packing;
 
+    /* set the response size to the size of data from the previous read */
+    req->response_capacity = tag->size;
+
+    /* if this is the first read of the tag then we do not know the size of the response data and cannot use packing unless the plc supports fragmented reads*/
+    req->first_read = tag->first_read;
+    req->supports_fragmented_read = tag->supports_fragmented_read;
+
     /* add the request to the session's list. */
     rc = session_add_request(tag->session, req);
 
@@ -631,6 +638,13 @@ int build_read_request_unconnected(ab_tag_p tag, int byte_offset)
 
     /* allow packing if the tag allows it. */
     req->allow_packing = tag->allow_packing;
+
+    /* set the response size to the size of data from the previous read */
+    req->response_capacity = tag->size;
+
+    /* if this is the first read of the tag then we do not know the size of the response data and cannot use packing unless the plc supports fragmented reads*/
+    req->first_read = tag->first_read;
+    req->supports_fragmented_read = tag->supports_fragmented_read;
 
     /* add the request to the session's list. */
     rc = session_add_request(tag->session, req);
@@ -781,6 +795,9 @@ int build_write_bit_request_connected(ab_tag_p tag)
 
     /* allow packing if the tag allows it. */
     req->allow_packing = tag->allow_packing;
+
+    /* sets the expected size of the response message */
+    req->response_capacity = 0;
 
     /* add the request to the session's list. */
     rc = session_add_request(tag->session, req);
@@ -970,6 +987,9 @@ int build_write_bit_request_unconnected(ab_tag_p tag)
     /* allow packing if the tag allows it. */
     req->allow_packing = tag->allow_packing;
 
+    /* sets the expected size of the response message */
+    req->response_capacity = 0;
+
     /* add the request to the session's list. */
     rc = session_add_request(tag->session, req);
 
@@ -1126,6 +1146,9 @@ int build_write_request_connected(ab_tag_p tag, int byte_offset)
 
     /* allow packing if the tag allows it. */
     req->allow_packing = tag->allow_packing;
+
+    /* sets the expected size of the response message */
+    req->response_capacity = 0;
 
     /* add the request to the session's list. */
     rc = session_add_request(tag->session, req);
@@ -1317,6 +1340,9 @@ int build_write_request_unconnected(ab_tag_p tag, int byte_offset)
 
     /* allow packing if the tag allows it. */
     req->allow_packing = tag->allow_packing;
+
+    /* sets the expected size of the response message */
+    req->response_capacity = 0;
 
     /* add the request to the session's list. */
     rc = session_add_request(tag->session, req);

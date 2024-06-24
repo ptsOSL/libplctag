@@ -131,6 +131,10 @@ struct ab_request_t {
     /* used by the background thread for incrementally getting data */
     int request_size; /* total bytes, not just data */
     int request_capacity;
+    int response_capacity; /* Size of data we expect to be returned by this request */
+
+    int first_read;
+    int supports_fragmented_read;
     uint8_t *data;
 };
 
