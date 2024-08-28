@@ -1419,8 +1419,10 @@ int process_requests(ab_session_p session)
             remaining_request_space = session->max_payload_size - (int)sizeof(cip_multi_req_header);
 
              /* -2 bytes for the msp (multi service packet) number of packets and -4 bytes for the cip response header,
-              * we later subtract 2 bytes for each packet, this is to allow for the INT offset to the packet within the msp */
-            remaining_response_space = session->max_payload_size - 2 - 4;
+              * we later subtract 2 bytes for each packet, this is to allow for the INT offset to the packet within the msp 
+              * finally we subtract 10 bytes just to give a comfort blanket as I had seen PLC_TAG_TOO_LARGE issue without it due to too much
+              * data being packed into a single packet */
+            remaining_response_space = session->max_payload_size - 2 - 4 - 10;
 
             if(vector_length(session->requests)) {
                 do {
@@ -1443,7 +1445,7 @@ int process_requests(ab_session_p session)
                      * request packet and the response packet if fragmented reads is not supported.
                      */
 
-                    if(num_bundled_requests == 0 || (allow_packing && remaining_request_space > 0 && (remaining_response_space >= 0 || request->supports_fragmented_read))) {
+                    if((num_bundled_requests == 0) || ((allow_packing && (remaining_request_space > 0)) && ((remaining_response_space >= 0) || (request->supports_fragmented_read)))) {
                         //pdebug(DEBUG_DETAIL, "packed %d requests with remaining request space %d and remaining response space %d", num_bundled_requests+1, remaining_request_space, remaining_response_space);
                         bundled_requests[num_bundled_requests] = request;
                         num_bundled_requests++;
@@ -1451,7 +1453,7 @@ int process_requests(ab_session_p session)
                         /* remove it from the queue. */
                         vector_remove(session->requests, 0);
                     }
-                } while(vector_length(session->requests) && remaining_request_space > 0 && num_bundled_requests < MAX_REQUESTS && allow_packing && (remaining_response_space >= 0 || request->supports_fragmented_read));
+                } while(vector_length(session->requests) && remaining_request_space > 0 && num_bundled_requests < MAX_REQUESTS && allow_packing && ((remaining_response_space >= 0) || (request->supports_fragmented_read)));
             } else {
                 pdebug(DEBUG_DETAIL, "All requests in queue were aborted, nothing to do.");
             }
